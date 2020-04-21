@@ -1,27 +1,33 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
 import { FiPower, FiTrash2 } from 'react-icons/fi'
 
-import logoImg from '../../assets/logo.svg'
-
-import api from '../../services/api'
+import '../../services/api'
 
 import './styles.css'
 
-export default function Profile() {
+
+import logoImg from '../../assets/logo.svg'
+import api from '../../services/api'
+
+export default function Logon() {
    const [incidents, setIncidents] = useState([])
-
    const history = useHistory()
-   const ongId = localStorage.getItem('ongId')
-   const ongName = localStorage.getItem('ongName')
 
-   useEffect(() => {
-      api.get('profiles', {
-         headers: {
-            Authorization: ongId
-         }
-      }).then(response => setIncidents(response.data))
-   }, [ongId])
+   const ongName = localStorage.getItem('ongName')
+   const ongId = localStorage.getItem('ongId')
+
+   try {
+      useEffect(() => {
+         api.get('profile', { headers: { Authorization: ongId } })
+         .then(response => { setIncidents(response.data); console.log(response.data) })
+      }, [ongId])
+
+     
+   } catch (error) {
+      alert('Erro ao trazer dados do perfil')
+   }
+
 
    async function handleDeleteIncident(id) {
       try {
@@ -33,46 +39,42 @@ export default function Profile() {
 
          setIncidents(incidents.filter(incident => incident.id !== id))
       } catch (error) {
-         alert(`Erro ao deletar, tente novamente.`)
+         alert('Erro ao deletar o caso')
       }
    }
 
    function handleLogout() {
       localStorage.clear()
-
       history.push('/')
    }
-
+console.log(ongId);
    return (
       <div className="profile-container">
          <header>
-            <img src={logoImg} alt="Be The Hero" />
-            <span>Bem-vinda, {ongName}</span>
+            <img src={logoImg} alt="Be The HERO" />
+            <span>Bem vinda, {ongName}</span>
 
             <Link className="button" to="/incidents/new">Cadastrar novo caso</Link>
-            <button onClick={handleLogout} type="button">
-               <FiPower size={18} />
+            <button type="button" onClick={handleLogout}>
+               <FiPower size={18} color="#E02041" />
             </button>
          </header>
-
-         <h1>Casos Cadastrados</h1>
-
+         <h1>Casos cadastrados</h1>
          <ul>
             {incidents.map(incident => (
                <li key={incident.id}>
                   <strong>CASO:</strong>
                   <p>{incident.title}</p>
-
                   <strong>DESCRIÇÃO:</strong>
                   <p>{incident.description}</p>
-
                   <strong>VALOR:</strong>
-                  <p>{Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(incident.value)}</p>
+                  <p>{Intl.NumberFormat('pt-br', { style: 'currency', currency: 'BRL' }).format(incident.value)}</p>
 
-                  <button onClick={() => handleDeleteIncident(incident.id)} type="button">
+                  <button type="button" onClick={() => handleDeleteIncident(incident.id)}>
                      <FiTrash2 size={20} color="#a8a8b3" />
                   </button>
                </li>
+
             ))}
          </ul>
       </div>
